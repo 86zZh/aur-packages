@@ -1,0 +1,6 @@
+# Arch packaging artifacts
+*.pkg.tar.*
+*.deb
+src/
+pkg/
+data.tar.xz

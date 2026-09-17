@@ -1,0 +1,93 @@
+name: Check & Auto-Update WeChat to AUR
+
+on:
+  schedule:
+    # Run every day at 02:00 UTC (10:00 AM CST)
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  check-and-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check Upstream Version and Hash
+        id: check_upstream
+        run: |
+          set -e
+          DEB_URL="https://dldir1v6.qq.com/weixin/Universal/Linux/WeChatLinux_x86_64.deb"
+          echo "Downloading upstream deb..."
+          curl -sL "$DEB_URL" -o wechat_upstream.deb
+          
+          # Extract control file
+          ar x wechat_upstream.deb control.tar.xz
+          tar -xf control.tar.xz ./control
+          UPSTREAM_VER=$(grep '^Version:' control | awk '{print $2}')
+          UPSTREAM_SHA256=$(sha256sum wechat_upstream.deb | awk '{print $1}')
+          rm -f wechat_upstream.deb control.tar.xz control debian-binary
+          
+          echo "Upstream version: $UPSTREAM_VER"
+          echo "Upstream sha256:  $UPSTREAM_SHA256"
+          
+          # Read current version from PKGBUILD
+          CURRENT_VER=$(grep '^pkgver=' PKGBUILD | cut -d '=' -f2)
+          echo "Current version:  $CURRENT_VER"
+          
+          if [ "$UPSTREAM_VER" != "$CURRENT_VER" ]; then
+            echo "needs_update=true" >> $GITHUB_OUTPUT
+            echo "new_ver=$UPSTREAM_VER" >> $GITHUB_OUTPUT
+            echo "new_sha256=$UPSTREAM_SHA256" >> $GITHUB_OUTPUT
+          else
+            echo "needs_update=false" >> $GITHUB_OUTPUT
+            echo "Upstream is already at latest version ($CURRENT_VER)."
+          fi
+
+      - name: Update PKGBUILD and .SRCINFO
+        if: steps.check_upstream.outputs.needs_update == 'true'
+        uses: docker://archlinux:latest
+        with:
+          args: >
+            bash -c "
+              pacman -Syu --noconfirm pacman-contrib git sudo binutils &&
+              useradd -m builder &&
+              echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers &&
+              chown -R builder:builder . &&
+              NEW_VER='${{ steps.check_upstream.outputs.new_ver }}' &&
+              NEW_SHA256='${{ steps.check_upstream.outputs.new_sha256 }}' &&
+              sed -i \"s/^pkgver=.*/pkgver=\${NEW_VER}/\" PKGBUILD &&
+              sed -i \"s/^pkgrel=.*/pkgrel=1/\" PKGBUILD &&
+              sed -i \"s/sha256sums_x86_64=('[a-f0-9]*')/sha256sums_x86_64=('\${NEW_SHA256}')/\" PKGBUILD &&
+              sudo -u builder makepkg --printsrcinfo > .SRCINFO
+            "
+
+      - name: Commit and Push to GitHub
+        if: steps.check_upstream.outputs.needs_update == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add PKGBUILD .SRCINFO
+          git commit -m "chore(release): bump WeChat to ${{ steps.check_upstream.outputs.new_ver }}"
+          git push origin main || git push origin master
+
+      - name: Push to AUR
+        if: steps.check_upstream.outputs.needs_update == 'true' && env.AUR_SSH_PRIVATE_KEY != ''
+        env:
+          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$AUR_SSH_PRIVATE_KEY" > ~/.ssh/aur
+          chmod 600 ~/.ssh/aur
+          ssh-keyscan -t ed25519,rsa aur.archlinux.org >> ~/.ssh/known_hosts
+          
+          git clone ssh://aur@aur.archlinux.org/tencent-wechat.git /tmp/aur-repo
+          cp PKGBUILD .SRCINFO wechat.sh wechat.desktop /tmp/aur-repo/
+          cd /tmp/aur-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Update to ${{ steps.check_upstream.outputs.new_ver }}" || exit 0
+          GIT_SSH_COMMAND="ssh -i ~/.ssh/aur" git push origin master
