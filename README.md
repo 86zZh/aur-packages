@@ -4,7 +4,7 @@
 > 专为现代 Linux 桌面（Wayland、Niri、Hyprland、GNOME、KDE Plasma 6）深度调优。
 
 [![AUR package](https://img.shields.io/aur/version/tencent-wechat)](https://aur.archlinux.org/packages/tencent-wechat)
-[![Update Check](https://github.com/TODO_USERNAME/tencent-wechat/actions/workflows/auto-update.yml/badge.svg)](https://github.com/TODO_USERNAME/tencent-wechat/actions)
+[![Update Check](https://github.com/qwerprog/tencent-wechat/actions/workflows/auto-update.yml/badge.svg)](https://github.com/qwerprog/tencent-wechat/actions)
 [![License: Proprietary](https://img.shields.io/badge/License-Proprietary-blue.svg)](https://www.wechat.com/us/service_terms.html)
 
 ---
