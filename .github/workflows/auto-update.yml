@@ -84,10 +84,14 @@ jobs:
           git push origin main || git push origin master || true
 
       - name: Push to AUR
-        if: (steps.check_upstream.outputs.needs_update == 'true' || inputs.force_sync == true) && env.AUR_SSH_PRIVATE_KEY != ''
+        if: steps.check_upstream.outputs.needs_update == 'true' || inputs.force_sync == true
         env:
           AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
         run: |
+          if [ -z "$AUR_SSH_PRIVATE_KEY" ]; then
+            echo "Error: AUR_SSH_PRIVATE_KEY secret is empty or not set in GitHub Secrets!"
+            exit 1
+          fi
           mkdir -p ~/.ssh
           echo "$AUR_SSH_PRIVATE_KEY" > ~/.ssh/aur
           chmod 600 ~/.ssh/aur
