@@ -82,6 +82,9 @@ package() {
     # Extract opt and usr hierarchies from official deb data
     bsdtar -xf data.tar.xz -C "${pkgdir}"
 
+    # Install pixmap for launchers that search /usr/share/pixmaps
+    install -Dm644 "${pkgdir}/usr/share/icons/hicolor/256x256/apps/wechat.png" "${pkgdir}/usr/share/pixmaps/wechat.png"
+
     # Replace upstream launcher with our native Wayland + privacy sandbox launcher
     install -Dm755 "${srcdir}/wechat.sh" "${pkgdir}/usr/bin/wechat"
 
