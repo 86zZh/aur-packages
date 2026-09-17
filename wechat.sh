@@ -37,12 +37,17 @@ fi
 # 3. Privacy Sandbox via Bubblewrap (if installed)
 # - Direct host $HOME mapping ensures drag-and-drop file sending works seamlessly
 # - Mask ~/.ssh and ~/.gnupg with empty tmpfs to protect user keys from proprietary software
+# - Pass through GPU (/dev/dri) and Audio (/dev/snd) for hardware acceleration and calls
 # - Isolated PID namespace and read-only system root
 if command -v bwrap >/dev/null 2>&1; then
     BWRAP_ARGS=(
         --ro-bind / /
         --dev /dev
+        --dev-bind-try /dev/dri /dev/dri
+        --dev-bind-try /dev/snd /dev/snd
+        --tmpfs /dev/shm
         --proc /proc
+        --ro-bind-try /sys /sys
         --tmpfs /tmp
         --bind /run /run
         --bind "${HOME}" "${HOME}"
@@ -50,6 +55,10 @@ if command -v bwrap >/dev/null 2>&1; then
         --tmpfs "${HOME}/.gnupg"
         --unshare-pid
     )
+    for dev_node in /dev/video*; do
+        [[ -e "$dev_node" ]] && BWRAP_ARGS+=(--dev-bind "$dev_node" "$dev_node")
+    done
+
     exec bwrap "${BWRAP_ARGS[@]}" "${WECHAT_BIN}" "$@"
 else
     exec "${WECHAT_BIN}" "$@"
