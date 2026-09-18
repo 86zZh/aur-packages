@@ -39,7 +39,7 @@ jobs:
           echo "Upstream version: $UPSTREAM_VER"
           echo "Upstream sha256:  $UPSTREAM_SHA256"
           
-          CURRENT_VER=$(grep '^pkgver=' PKGBUILD | cut -d '=' -f2)
+          CURRENT_VER=$(grep '^pkgver=' tencent-wechat/PKGBUILD | cut -d '=' -f2)
           echo "Current version:  $CURRENT_VER"
           
           if [ "$UPSTREAM_VER" != "$CURRENT_VER" ]; then
@@ -58,6 +58,7 @@ jobs:
           NEW_VER='${{ steps.check_upstream.outputs.new_ver }}'
           NEW_SHA256='${{ steps.check_upstream.outputs.new_sha256 }}'
           
+          cd tencent-wechat
           sed -i "s/^pkgver=.*/pkgver=${NEW_VER}/" PKGBUILD
           sed -i "s/^pkgrel=.*/pkgrel=1/" PKGBUILD
           sed -i "s/sha256sums_x86_64=('[a-f0-9]*')/sha256sums_x86_64=('${NEW_SHA256}')/" PKGBUILD
@@ -65,10 +66,11 @@ jobs:
           sed -i "s/\tpkgver = .*/\tpkgver = ${NEW_VER}/" .SRCINFO
           sed -i "s/\tpkgrel = .*/\tpkgrel = 1/" .SRCINFO
           sed -i "s/sha256sums_x86_64 = [a-f0-9]*/sha256sums_x86_64 = ${NEW_SHA256}/" .SRCINFO
+          cd ..
           
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add PKGBUILD .SRCINFO
+          git add tencent-wechat/PKGBUILD tencent-wechat/.SRCINFO
           git commit -m "chore(release): bump WeChat to ${NEW_VER}" || true
           git push origin main || true
 
@@ -87,7 +89,7 @@ jobs:
           chmod 600 ~/.ssh/aur
           ssh-keyscan -t ed25519,rsa aur.archlinux.org >> ~/.ssh/known_hosts
           
-          AUR_DIR="/tmp/aur-repo"
+          AUR_DIR="/tmp/aur-wechat"
           rm -rf "$AUR_DIR"
           mkdir -p "$AUR_DIR"
           cd "$AUR_DIR"
@@ -98,12 +100,12 @@ jobs:
           git remote add origin ssh://aur@aur.archlinux.org/tencent-wechat.git
           GIT_SSH_COMMAND="ssh -i ~/.ssh/aur" git pull origin master || true
           
-          cp -f $GITHUB_WORKSPACE/PKGBUILD \
-                $GITHUB_WORKSPACE/.SRCINFO \
-                $GITHUB_WORKSPACE/wechat.sh \
-                $GITHUB_WORKSPACE/wechat.desktop \
-                $GITHUB_WORKSPACE/LICENSE \
-                $GITHUB_WORKSPACE/DISCLAIMER \
+          cp -f $GITHUB_WORKSPACE/tencent-wechat/PKGBUILD \
+                $GITHUB_WORKSPACE/tencent-wechat/.SRCINFO \
+                $GITHUB_WORKSPACE/tencent-wechat/wechat.sh \
+                $GITHUB_WORKSPACE/tencent-wechat/wechat.desktop \
+                $GITHUB_WORKSPACE/tencent-wechat/LICENSE \
+                $GITHUB_WORKSPACE/tencent-wechat/DISCLAIMER \
                 "$AUR_DIR/"
           
           git add -A
