@@ -1,0 +1,80 @@
+# aur-packages
+
+[简体中文](./README.md)
+
+Personal Arch User Repository (AUR) packages collection maintained by Chapman ([@qwerprog](https://github.com/qwerprog)).
+
+This monorepo manages PKGBUILDs and runtime wrappers for packages maintained on the Arch User Repository, featuring automated daily upstream version checking, native Wayland optimization, and lightweight Bubblewrap security sandboxing.
+
+---
+
+## Packages Overview
+
+| Package | Version | AUR Link | Features & Highlights |
+| :--- | :--- | :--- | :--- |
+| **[tencent-wechat](./tencent-wechat)** | ![AUR version](https://img.shields.io/aur/version/tencent-wechat?color=blue&logo=archlinux) | [AUR](https://aur.archlinux.org/packages/tencent-wechat) | • Native Wayland auto-detection & Fcitx5 `text-input-v3` candidate box tracking<br>• Real host `$HOME` bind (resolves file manager drag-and-drop sending issues)<br>• Sensitive directory masking (empty tmpfs isolation for `~/.ssh` and `~/.gnupg`)<br>• Automatic symlink maintenance to prevent chat history database fragmentation |
+| **[tencent-qq](./tencent-qq)** | ![AUR version](https://img.shields.io/aur/version/tencent-qq?color=blue&logo=archlinux) | [AUR](https://aur.archlinux.org/packages/tencent-qq) | • Native Ozone Wayland auto-detection & `text-input-v3` IME cursor tracking<br>• Lightweight Bubblewrap privacy sandbox with key masking<br>• Automated cleanup of vulnerable bundled `libssh2.so.1`<br>• Standardized `/usr/bin/qq` and `/usr/bin/tencent-qq` commands |
+
+---
+
+## Installation
+
+Install using your preferred AUR helper (e.g., `paru` or `yay`):
+
+```bash
+# Tencent WeChat
+paru -S tencent-wechat
+# or
+yay -S tencent-wechat
+
+# Tencent QQ
+paru -S tencent-qq
+# or
+yay -S tencent-qq
+```
+
+---
+
+## Repository Layout
+
+```text
+aur-packages/
+├── .github/workflows/
+│   ├── sync-tencent-wechat.yml   # Daily upstream check & auto-sync to AUR for WeChat
+│   └── sync-tencent-qq.yml       # Daily upstream check & auto-sync to AUR for QQ
+│
+├── tencent-wechat/               # WeChat AUR package files
+│   ├── PKGBUILD                  # Package build script
+│   ├── .SRCINFO                  # AUR package metadata
+│   ├── wechat.sh                 # Native Wayland & sandbox launcher
+│   ├── wechat.desktop            # Desktop entry
+│   └── LICENSE                   # License statement
+│
+└── tencent-qq/                   # QQ AUR package files
+    ├── PKGBUILD                  # Package build script
+    ├── .SRCINFO                  # AUR package metadata
+    ├── qq.sh                     # Native Wayland & sandbox launcher
+    ├── qq.desktop                # Desktop entry
+    └── LICENSE                   # License statement
+```
+
+---
+
+## Continuous Integration & Automation
+
+Each package directory is independently maintained and synchronized with the official AUR Git repository via GitHub Actions:
+
+1. The detection workflow runs daily on schedule (02:00 UTC);
+2. Automatically retrieves metadata from Tencent's latest official deb packages;
+3. If an upstream update is detected, the workflow automatically:
+   - Extracts the new version and computes SHA-256 checksums;
+   - Updates `PKGBUILD` and regenerates `.SRCINFO` in the corresponding directory;
+   - Commits the updated metadata back to this GitHub repository;
+   - Authenticates and pushes directly to the official AUR Git server (`ssh://aur@aur.archlinux.org/<pkgname>.git`).
+
+---
+
+## Disclaimer & License
+
+- The underlying software binaries are proprietary products owned by Tencent Technology (Shenzhen) Co., Ltd. This repository provides only community packaging scripts and runtime wrappers for Arch Linux.
+- Packaging scripts, wrapper scripts, and configuration files created in this repository are provided under open-source community-compatible terms.
