@@ -36,6 +36,10 @@ jobs:
           chmod 600 ~/.ssh/aur
           ssh-keyscan -t ed25519,rsa aur.archlinux.org >> ~/.ssh/known_hosts
           
+          # Restore and adopt package if it was previously deleted on AUR
+          ssh -i ~/.ssh/aur -o StrictHostKeyChecking=accept-new aur@aur.archlinux.org restore openai-chatgpt || true
+          ssh -i ~/.ssh/aur -o StrictHostKeyChecking=accept-new aur@aur.archlinux.org adopt openai-chatgpt || true
+          
           AUR_DIR="/tmp/aur-chatgpt"
           rm -rf "$AUR_DIR"
           mkdir -p "$AUR_DIR"
