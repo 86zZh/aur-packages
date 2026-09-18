@@ -10,8 +10,8 @@ This monorepo houses PKGBUILDs and runtime wrappers for packages maintained on t
 
 | Package | Version | AUR Link | Features & Highlights |
 | :--- | :--- | :--- | :--- |
-| **[tencent-wechat](./tencent-wechat)** | ![AUR version](https://img.shields.io/aur/version/tencent-wechat?color=blue) | [AUR](https://aur.archlinux.org/packages/tencent-wechat) | • Native Wayland auto-detection & Fcitx5 `text-input-v3`<br>• Bubblewrap sandbox with real `$HOME` (fixes drag-and-drop file sending)<br>• Privacy protection (masks `~/.ssh` and `~/.gnupg`)<br>• Chat history preservation links |
-| **[tencent-qq](./tencent-qq)** | ![AUR version](https://img.shields.io/aur/version/tencent-qq?color=blue) | [AUR](https://aur.archlinux.org/packages/tencent-qq) | • Native Ozone Wayland & `text-input-v3` IME cursor tracking<br>• Lightweight privacy sandbox with key masking<br>• Automated cleanup of vulnerable bundled `libssh2.so.1`<br>• Clean `/usr/bin/qq` and `/usr/bin/tencent-qq` commands |
+| **[tencent-wechat](./tencent-wechat)** | ![AUR version](https://img.shields.io/aur/version/tencent-wechat?color=blue&logo=archlinux) | [AUR](https://aur.archlinux.org/packages/tencent-wechat) | • Native Wayland auto-detection & Fcitx5 `text-input-v3`<br>• Bubblewrap sandbox with real `$HOME` (fixes drag-and-drop file sending)<br>• Privacy protection (masks `~/.ssh` and `~/.gnupg`)<br>• Chat history preservation links |
+| **[tencent-qq](./tencent-qq)** | ![AUR version](https://img.shields.io/aur/version/tencent-qq?color=blue&logo=archlinux) | [AUR](https://aur.archlinux.org/packages/tencent-qq) | • Native Ozone Wayland & `text-input-v3` IME cursor tracking<br>• Lightweight privacy sandbox with key masking<br>• Automated cleanup of vulnerable bundled `libssh2.so.1`<br>• Clean `/usr/bin/qq` and `/usr/bin/tencent-qq` commands |
 
 ---
 
